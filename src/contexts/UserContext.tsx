@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 // Define the form data types directly here
 type DoctorFormData = {
@@ -13,7 +13,7 @@ type DoctorFormData = {
   pword: string;
   cpword: string;
   terms: boolean;
-  specialty: string;
+  specialty: number;
   induction_year: string;
   place_of_practice: string;
 };
@@ -31,7 +31,7 @@ type PatientFormData = {
   pword: string;
   cpword: string;
   terms: boolean;
-  specialty?: string;
+  specialty?: number;
   induction_year?: string;
   place_of_practice?: string;
 };
@@ -51,6 +51,11 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [userType, setUserType] = useState<'doctor' | 'patient' | null>(null);
   const [formData, setFormData] = useState<Partial<FormData>>({});
+  
+  useEffect(() => {
+    const storedUserType = localStorage.getItem('userType') as 'doctor' | 'patient' | null;
+    setUserType(storedUserType);
+  }, []);
 
   const updateFormData = (fields: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...fields }));

@@ -22,7 +22,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Store token if needed
     } catch (error) {
       console.error('Login failed:', error);
-      throw error; // Handle login error
+      throw error; 
     }
   };
 

@@ -7,6 +7,7 @@ const Begin = () => {
 
   const handleSelect = (type: 'doctor' | 'patient') => {
     setUserType(type);
+    localStorage.setItem('userType', type); 
     navigate('/signup');
   };
 

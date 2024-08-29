@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FormLayout } from './FormLayout';
 import arrow from "/rarrow.png";
-import axios from 'axios'; // Import axios for making API requests
+import axios from 'axios'; 
 
 type StepFourData = {
-    specialty: string;
+    specialty: number; 
     induction_year: string;
     place_of_practice: string;
 };
@@ -13,21 +13,24 @@ type StepFourProps = StepFourData & {
     updateFields: (fields: Partial<StepFourData>) => void;
 };
 
-// Define the shape of the API response data
+
+interface Specialty {
+    id: number;
+    name: string;
+}
+
 interface SpecialtyResponse {
     success: boolean;
     message: string;
-    data: {
-        id: number;
-        name: string;
-    }[];
+    data: Specialty[];
 }
 
 const StepForm4 = ({ specialty, induction_year, place_of_practice, updateFields }: StepFourProps) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [specialties, setSpecialties] = useState<string[]>([]); // State to hold fetched specialties
+    const [specialties, setSpecialties] = useState<Specialty[]>([]); // State to hold fetched specialties
     const [loading, setLoading] = useState(true); // State to handle loading
     const [error, setError] = useState<string | null>(null); // State to handle errors
+    const [selectedSpecialty, setSelectedSpecialty] = useState<Specialty | null>(null); // Track the selected specialty
 
     useEffect(() => {
         const fetchSpecialties = async () => {
@@ -45,8 +48,7 @@ const StepForm4 = ({ specialty, induction_year, place_of_practice, updateFields 
                 });
 
                 if (response.data.success) {
-                    const specialtyNames = response.data.data.map(spec => spec.name);
-                    setSpecialties(specialtyNames); // Update state with fetched specialty names
+                    setSpecialties(response.data.data); // Update state with fetched specialties
                 } else {
                     setError('Failed to load specialties');
                 }
@@ -65,13 +67,15 @@ const StepForm4 = ({ specialty, induction_year, place_of_practice, updateFields 
         setIsDropdownOpen(prev => !prev);
     };
 
-    const handleSelectSpecialty = (selectedSpecialty: string) => {
-        updateFields({ specialty: selectedSpecialty });
+    const handleSelectSpecialty = (selected: Specialty) => {
+        setSelectedSpecialty(selected);
+        updateFields({ specialty: selected.id }); // Update the ID as a string
         setIsDropdownOpen(false); // Close dropdown after selection
     };
 
-    // Debugging statement to verify specialties type
+    // Debugging statement to verify specialties
     console.log('Specialties:', specialties);
+    console.log('Selected Specialty:', selectedSpecialty);
 
     return (
         <div className="flex justify-center items-center py-12">
@@ -82,11 +86,10 @@ const StepForm4 = ({ specialty, induction_year, place_of_practice, updateFields 
                         <input
                             id="specialty"
                             type="text"
-                            value={specialty}
+                            value={selectedSpecialty ? selectedSpecialty.name : ''} // Display name of the selected specialty
                             readOnly // Make input read-only to only use it for displaying selected value
                             className='w-full px-4 py-4 text-md text-black bg-[#F2FFF9] border-white border-2 rounded-lg border-opacity-50 outline-none focus:border-blue-500 placeholder-gray-300 transition duration-200'
                             placeholder="Select Specialty"
-                             
                         />
                         <img src={arrow} width={20} alt="Dropdown arrow" className="absolute right-4 cursor-pointer" onClick={toggleDropdown} />
                     </label>
@@ -94,13 +97,13 @@ const StepForm4 = ({ specialty, induction_year, place_of_practice, updateFields 
                         <div className="absolute bg-white border border-gray-300 rounded-lg mt-2 w-full z-10">
                             {loading && <div className="px-4 py-2">Loading...</div>}
                             {error && <div className="px-4 py-2 text-red-500">{error}</div>}
-                            {!loading && !error && Array.isArray(specialties) && specialties.map((spec, index) => (
+                            {!loading && !error && Array.isArray(specialties) && specialties.map((spec) => (
                                 <div
-                                    key={index}
+                                    key={spec.id}
                                     onClick={() => handleSelectSpecialty(spec)}
                                     className="px-4 py-2 cursor-pointer hover:bg-gray-100"
                                 >
-                                    {spec}
+                                    {spec.name}
                                 </div>
                             ))}
                         </div>

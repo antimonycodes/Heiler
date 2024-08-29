@@ -32,7 +32,7 @@ const SignUp = () => {
     pword: string;
     cpword: string;
     terms: boolean;
-    specialty?: string;
+    specialty?: number;
     induction_year?: string;
     place_of_practice?: string;
   };
@@ -81,7 +81,7 @@ const SignUp = () => {
   }
 
   interface StepFourData {
-    specialty: string;
+    specialty: number;
     induction_year: string;
     place_of_practice: string;
     updateFields: (fields: Partial<StepFourData>) => void;
@@ -118,11 +118,12 @@ const SignUp = () => {
   };
 
   const stepForm4Props: StepFourData = {
-    specialty: formData.specialty || '',
+    specialty: typeof formData.specialty === 'number' ? formData.specialty : Number(formData.specialty || 0),
     induction_year: formData.induction_year || '',
     place_of_practice: formData.place_of_practice || "",
     updateFields: (fields) => updateFormData(fields),
   };
+  
 
   const { steps, currentStepIndex, step, isFirstStep, isLastStep, back, next } = UseStepForm([
     <StepForm1 key="stepOne" {...stepForm1Props} />,
@@ -156,8 +157,8 @@ const onSubmit = async (e: FormEvent) => {
       const url = `${baseURL}${endpoint}`;
       console.log(endpoint)
       
-      // Retrieve API key or token (for demonstration, replace with actual method of retrieval)
-      const apiKey = import.meta.env.VITE_APP_API_KEY; // or retrieve from context or another secure source
+      // Retrieve API key or token (for demonstration, 
+      const apiKey = import.meta.env.VITE_APP_API_KEY; 
 
       // Send the API request using axios
       const response = await axios.post(url, formData, {
