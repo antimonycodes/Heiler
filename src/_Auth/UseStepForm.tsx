@@ -29,6 +29,9 @@ export function UseStepForm(steps: ReactElement[]) {
         back,
         steps,
         isFirstStep: currentStepIndex === 0,
+        isSecondStep: currentStepIndex ===1,
+        isThirdStep: currentStepIndex ===2,
+        isFourthStep: currentStepIndex ===3,
         isLastStep: currentStepIndex === steps.length - 1
     };
 }
