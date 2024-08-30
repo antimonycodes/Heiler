@@ -1,14 +1,15 @@
 // import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import BottomNav from '../../components/Shared/BottomNav';
 import SideNav from '../../components/Shared/SideNav';
 import { Navigate, Outlet } from 'react-router-dom';
 // import TopSection from '@/components/Home/TopSection';
 
 const RootLayout = () => {
-  const isAuthenticated = true;
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    return <Navigate to="/begin" />;
+    return <Navigate to="/signin" />;
   }
 
 

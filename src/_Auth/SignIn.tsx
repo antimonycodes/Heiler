@@ -3,19 +3,25 @@ import { FormLayout } from './FormLayout'; // Ensure this is correctly implement
 import logo from '/logo.png';
 import { FormEvent, useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUser } from '@/contexts/UserContext';
 
 const SignIn = () => {
   const [mail, setMail] = useState('');
   const [pword, setPword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { userType } = useUser();
+  const { isAuthenticated, login } = useAuth();
+  const isDoctor = userType === 'doctor';
 
   const handleSignIn = async (e: FormEvent) => {
     e.preventDefault();
 
     try {
       const baseURL = import.meta.env.VITE_APP_BASE_URL;
-      const endpoint = '/auth/user.login'; // Adjust the endpoint as needed
+      const endpoint = isDoctor ? '/auth/doctor.login' : '/auth/user.login'; // Fixed endpoint for login
       const url = `${baseURL}${endpoint}`;
 
       // Retrieve API key or token (if needed)
@@ -30,15 +36,21 @@ const SignIn = () => {
       });
 
       console.log("Sign-in successful!", response.data);
-
+      
       // Handle success (e.g., store token, navigate to dashboard)
-      localStorage.setItem('token', response.data.token); // Adjust based on your backend response
+      localStorage.setItem('token', response.data.data.token); // Adjust based on your backend response
+      
+      // Call the login function from AuthContext
+      await login({ email: mail, password: pword });
+
       navigate('/'); // Navigate to the appropriate page after sign-in
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        console.error('Axios error:', error.response?.data); // Log full error response
         setError(error.response?.data.message || 'Sign-in failed. Please try again.');
       } else {
+        console.error('Unexpected error:', error); // Log unexpected error
         setError('Unexpected error occurred. Please try again.');
       }
     }
@@ -77,7 +89,7 @@ const SignIn = () => {
             type="submit"
             className="bg-customGreen text-white py-2 px-4 rounded mt-4 w-full"
           >
-            Login
+            {loading ? 'Logging in...' : 'Login'}
           </button>
           <p className="mt-4">
             Don't have an account? <Link to="/signup"><span className='text-customGreen font-bold'>SignUp</span></Link>
