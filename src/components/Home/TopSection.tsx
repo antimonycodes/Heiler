@@ -1,6 +1,7 @@
 import bell from "../../assets/bell.svg"
 import profilePicture from "../../assets/profilepic.png"
 import downArrow from "../../assets/downArrow.svg"
+import SignOut from "@/_Auth/SignOut";
 
 const TopSection = () => {
     const d = new Date();
@@ -19,6 +20,7 @@ const TopSection = () => {
     return (
         <div className="py-4 px-4 md:px-12 shadow ">
             <p className='text-customGray'>{`${dayName}, ${dayOfMonth} ${monthName}`}</p>
+            <SignOut/>
             <div className=" flex items-center justify-between">
             <h1 className=' text-xl font-bold'>Hi, {name}</h1>
             <div className=" flex items-center gap-4">
