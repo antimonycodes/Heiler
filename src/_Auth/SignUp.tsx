@@ -10,16 +10,21 @@ import success from "/Success.png";
 import { useUser } from '@/contexts/UserContext';
 import axios from 'axios';
 import StepForm4 from './StepForm4';
+// import { ToastContainer, toast } from 'react-toastify';
+//   import 'react-toastify/dist/ReactToastify.css';
+  import { Toaster } from 'react-hot-toast';
+  import { toast } from "react-toastify";
+  
 
 const SignUp = () => {
+  const notify = () => toast("Wow so easy!");
   const { userType, formData, updateFormData } = useUser();
   const [isSuccess, setIsSuccess] = React.useState(false);
   const navigate = useNavigate();
 
   const isDoctor = userType === 'doctor';
-//   const isPatient = userType === 'patient';
+  const isPatient = userType === 'patient';
 
-  // Define the form data types directly in this file
   type DoctorFormData = {
     firstName: string;
     lastName: string;
@@ -44,7 +49,6 @@ const SignUp = () => {
     dob: string;
     phone: string;
     gender: string;
-    // occupation?: string; // Optional for Patient
     nationality: string;
     home_address: string;
     pword: string;
@@ -54,7 +58,6 @@ const SignUp = () => {
 
   type FormData = DoctorFormData | PatientFormData;
 
-  // Define exact types for each step's props
   interface StepOneData {
     firstName: string;
     lastName: string;
@@ -66,7 +69,6 @@ const SignUp = () => {
   interface StepTwoData {
     phone: string;
     gender: string;
-    // occupation: string;
     nationality: string;
     home_address: string;
     updateFields: (fields: Partial<StepTwoData>) => void;
@@ -87,7 +89,6 @@ const SignUp = () => {
     updateFields: (fields: Partial<StepFourData>) => void;
   }
 
-  // Create props based on the current form data and requirements
   const stepForm1Props: StepOneData = {
     firstName: formData.firstName || '',
     lastName: formData.lastName || '',
@@ -96,14 +97,9 @@ const SignUp = () => {
     updateFields: (fields) => updateFormData(fields),
   };
 
-  // Check if userType is 'patient'
-  const isPatient = userType === 'patient';
-
   const stepForm2Props: StepTwoData = {
     phone: formData.phone || '',
     gender: formData.gender || '',
-    // Conditionally assign occupation if userType is 'patient'
-    // occupation: isPatient ? (formData as PatientFormData).occupation || '' : '',
     nationality: formData.nationality || '',
     home_address: formData.home_address || '',
     updateFields: (fields) => updateFormData(fields),
@@ -123,72 +119,62 @@ const SignUp = () => {
     place_of_practice: formData.place_of_practice || "",
     updateFields: (fields) => updateFormData(fields),
   };
-  
 
-  const { steps, currentStepIndex, step, isFirstStep, isLastStep, back, next } = UseStepForm([
+  const { steps, currentStepIndex, step, isFirstStep,isSecondStep,isThirdStep, isFourthStep, isLastStep, back, next } = UseStepForm([
     <StepForm1 key="stepOne" {...stepForm1Props} />,
     <StepForm2 key="stepTwo" {...stepForm2Props} />,
-    ...(isDoctor ? [<StepForm4 key="stepFour" {...stepForm4Props} />] : []), // Conditionally add Step 4
+    ...(isDoctor ? [<StepForm4 key="stepFour" {...stepForm4Props} />] : []),
     <StepForm3 key="stepThree" {...stepForm3Props} />,
   ]);
-  
 
+  const validateStep1 = () => stepForm1Props.firstName && stepForm1Props.lastName && stepForm1Props.mail && stepForm1Props.dob;
+  const validateStep2 = () => stepForm2Props.phone && stepForm2Props.gender && stepForm2Props.nationality && stepForm2Props.home_address;
+  const validateStep3 = () => stepForm3Props.pword && stepForm3Props.cpword && stepForm3Props.terms;
+  const validateStep4 = () => stepForm4Props.specialty && stepForm4Props.induction_year && stepForm4Props.place_of_practice;
 
-//   function onSubmit(e: FormEvent) {
-//     e.preventDefault();
-//     if (isLastStep) {
-//       console.log("Form Submitted!", formData);
-//       setIsSuccess(true);
-//     //   navigate('/main'); // Adjust navigation as needed
-//     } else {
-//       next();
-//     }
-//   }
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    
+    const isValid = [
+      isFirstStep ? validateStep1() : true,
+      isSecondStep ? validateStep2() : true,
+      isThirdStep ? validateStep3() : true,
+      isFourthStep ? validateStep4() : true
+    ].every(Boolean);
 
+    if (isValid) {
+      if (isLastStep) {
+        try {
+          const baseURL = import.meta.env.VITE_APP_BASE_URL;
+          const endpoint = isDoctor ? '/auth/doctor.register' : '/auth/user.register';
+          const url = `${baseURL}${endpoint}`;
+          
+          const apiKey = import.meta.env.VITE_APP_API_KEY;
 
-const onSubmit = async (e: FormEvent) => {
-  e.preventDefault();
-  
-  if (isLastStep) {
-    try {
-      // Construct the URL based on userType
-      const baseURL = import.meta.env.VITE_APP_BASE_URL;
-      const endpoint = isDoctor ? '/auth/doctor.register' : '/auth/user.register';
-      const url = `${baseURL}${endpoint}`;
-      console.log(endpoint)
-      
-      // Retrieve API key or token (for demonstration, 
-      const apiKey = import.meta.env.VITE_APP_API_KEY; 
+          const response = await axios.post(url, formData, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`,
+            }
+          });
 
-      // Send the API request using axios
-      const response = await axios.post(url, formData, {
-        
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`, // Add Authorization header if needed
+          console.log("Form Submitted!", response.data);
+          localStorage.setItem('email', formData.mail ?? "");
+          navigate("/verifyEmail");
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error('Axios error submitting the form:', error.response?.data || error.message);
+          } else {
+            console.error('Unexpected error:', error);
+          }
         }
-      });
-
-      // Handle the response
-      console.log("Form Submitted!", response.data);
-        localStorage.setItem('email', formData.mail ?? ""); // Store email in local storage
-      // setIsSuccess(true);
-      navigate("/verifyEmail")
-
-      // Navigate to the appropriate page
-      // navigate('/main'); // Adjust navigation as needed
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Axios error submitting the form:', error.response?.data || error.message);
       } else {
-        console.error('Unexpected error:', error);
+        next();
       }
-      // Handle the error (e.g., show an error message to the user)
+    } else {
+      toast.success("Account created! You can login now");
     }
-  } else {
-    next();
-  }
-};
+  };
 
   function handleOkayClick() {
     navigate('/signin'); 
@@ -212,6 +198,8 @@ const onSubmit = async (e: FormEvent) => {
           onSubmit={onSubmit} 
           className="w-full gap-3 flex flex-col text-center justify-center px-4 py-8 rounded-md bg-white shadow-[#2A2A2A33]"
         >
+          {/* <ToastContainer /> */}
+
           <div className="flex justify-center items-center mb-4">
             <img src={logo} alt="logo" width={100} height={100} />
           </div>
@@ -233,12 +221,15 @@ const onSubmit = async (e: FormEvent) => {
         <img src={success} alt="Success" width={150} />
         <h1 className='text-lg font-bold'>You have successfully created your account.</h1>
         <p className='text-customGray'>You can now have access to your dashboard to find and chat with a doctor of your choice.</p>
+        <div><Toaster/></div>
+
         <button 
           className="bg-customGreen text-white py-2 px-4 rounded mt-4 w-full"
           onClick={handleOkayClick}
         >
           Okay
         </button>
+
       </div>
     )
   );

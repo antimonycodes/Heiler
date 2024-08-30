@@ -17,7 +17,7 @@ function App() {
  
 
   return (
-  
+    <>
       <Routes>
         {/* PUBLIC ROUTES */}
         <Route path="/begin" element={<Begin />} />
@@ -37,6 +37,8 @@ function App() {
         <Route path="/wallet" element={<Wallet/>}/>
         </Route>
       </Routes>
+      
+     </>
   
 
   )
