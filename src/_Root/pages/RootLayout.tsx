@@ -1,16 +1,17 @@
 // import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+// import { useAuth } from '@/contexts/AuthContext';
+import TopSection from '@/components/Home/TopSection';
 import BottomNav from '../../components/Shared/BottomNav';
 import SideNav from '../../components/Shared/SideNav';
-import { Navigate, Outlet } from 'react-router-dom';
+import {  Outlet } from 'react-router-dom';
 // import TopSection from '@/components/Home/TopSection';
 
 const RootLayout = () => {
-  const { isAuthenticated } = useAuth();
+  // const { isAuthenticated } = useAuth();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/signin" />;
-  }
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/signin" />;
+  // }
 
 
   // const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -32,18 +33,26 @@ const RootLayout = () => {
       <Outlet />
       </div>
       </div> */}
-      <div className=' w-full  md:flex'>
-        {/* <TopSection/> */}
+      <div className=' flex'>
+        {/*  */}
         <div className=' hidden md:block'>
-        <SideNav/>
+          <SideNav/>
         </div>
-        <section className=' flex-1'>
+        {/*  */}
+              <div className=' w-full flex flex-col  h-screen'>
+        <div>
+          <TopSection/>
+        </div>
+        <div className=' overflow-y-scroll'>
           <Outlet/>
-        </section>
-        <div className=' md:hidden fixed bottom-0 w-full'>
-        <BottomNav/>
+        </div>
+        <div className=' fixed bottom-0 w-full md:hidden'>
+          <BottomNav/>
         </div>
       </div>
+      </div>
+
+   
     </>
   );
 };

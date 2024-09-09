@@ -1,18 +1,13 @@
-import HomeIcon from "../Svgs/HomeIcon"; // Ensure correct path
-import doctorIcon from "/doctor.svg";  
-import chatIcon from "/chat.svg";
-import walletIcon from "/wallet.svg";
-import settingsIcon from "/settings.svg";
+import { FaHome, FaUserMd, FaComments, FaWallet, FaCog } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 
 const BottomNav = () => {
   const BottomNavs = [
-    { name: "Home", path: "/", Icon: HomeIcon },
-    // Add other items here with Icon components for custom SVGs
-    { name: "Doctor", path: "/doctor", Icon: () => <img src={doctorIcon} alt="Doctor" className="nav-icon" /> },
-    { name: "Chat", path: "/chat", Icon: () => <img src={chatIcon} alt="Chat" className="nav-icon" /> },
-    { name: "Wallet", path: "/wallet", Icon: () => <img src={walletIcon} alt="Wallet" className="nav-icon" /> },
-    { name: "Settings", path: "/setting", Icon: () => <img src={settingsIcon} alt="Settings" className="nav-icon" /> },
+    { name: "Home", path: "/", icon: <FaHome /> },
+    { name: "Doctor", path: "/doctor", icon: <FaUserMd /> },
+    { name: "Chat", path: "/chat", icon: <FaComments /> },
+    { name: "Wallet", path: "/wallet", icon: <FaWallet /> },
+    { name: "Settings", path: "/settings", icon: <FaCog /> },
   ];
 
   const location = useLocation();
@@ -22,8 +17,8 @@ const BottomNav = () => {
     <div className="bg-white shadow  w-full flex justify-between items-center px-4 py-2">
       {BottomNavs.map((navItem, index) => (
         <Link to={navItem.path} key={index}>
-          <div className="flex-1  item-center py-2 transition-all duration-700">
-            <navItem.Icon isActive={isActive(navItem.path)} className="nav-icon text-center w-full mx-auto" />
+          <div className={`flex-1 flex flex-col items-center py-2 transition-all duration-700 ${isActive(navItem.path) ? " text-customGreen" : ' text-customGray'}`}>
+          <span className="text-xl">{navItem.icon}</span>
             <span className={`text-xs ${isActive(navItem.path) ? "block text-customGreen" : "hidden"}`}>{navItem.name}</span>
           </div>
         </Link>

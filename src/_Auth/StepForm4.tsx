@@ -41,6 +41,7 @@ const StepForm4 = ({ specialty, induction_year, place_of_practice, updateFields 
                 const apiKey = import.meta.env.VITE_APP_API_KEY; // Retrieve API key from env variables or another secure source
 
                 const response = await axios.get<SpecialtyResponse>(url, {
+                    
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${apiKey}`, // Add Authorization header if needed

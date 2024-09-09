@@ -1,6 +1,7 @@
 import HeroButtons from "./HeroButtons"
 import heroImage from "/homehero.png"
 
+
 const HomeHero = () => {
   return (
     <div className="">

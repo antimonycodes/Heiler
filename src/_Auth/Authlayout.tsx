@@ -3,11 +3,11 @@ import banner from "/banner.jpg";
 
 const Authlayout = () => {
 
-  const isAuthenticated = false;
+  // const isAuthenticated = false;
 
-  if (isAuthenticated) {
-    return <Navigate to="/" />;
-  }
+  // if (isAuthenticated) {
+  //   return <Navigate to="/" />;
+  // }
 
   return (
     <div

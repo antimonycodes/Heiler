@@ -10,20 +10,15 @@ import success from "/Success.png";
 import { useUser } from '@/contexts/UserContext';
 import axios from 'axios';
 import StepForm4 from './StepForm4';
-// import { ToastContainer, toast } from 'react-toastify';
-//   import 'react-toastify/dist/ReactToastify.css';
-  import { Toaster } from 'react-hot-toast';
-  import { toast } from "react-toastify";
-  
+import { Toaster } from 'react-hot-toast';
+import { toast } from "react-toastify";
 
 const SignUp = () => {
-  const notify = () => toast("Wow so easy!");
   const { userType, formData, updateFormData } = useUser();
   const [isSuccess, setIsSuccess] = React.useState(false);
   const navigate = useNavigate();
 
   const isDoctor = userType === 'doctor';
-  const isPatient = userType === 'patient';
 
   type DoctorFormData = {
     firstName: string;
@@ -120,28 +115,57 @@ const SignUp = () => {
     updateFields: (fields) => updateFormData(fields),
   };
 
-  const { steps, currentStepIndex, step, isFirstStep,isSecondStep,isThirdStep, isFourthStep, isLastStep, back, next } = UseStepForm([
+  const { steps, currentStepIndex, step, isFirstStep, isLastStep, back, next } = UseStepForm([
     <StepForm1 key="stepOne" {...stepForm1Props} />,
     <StepForm2 key="stepTwo" {...stepForm2Props} />,
     ...(isDoctor ? [<StepForm4 key="stepFour" {...stepForm4Props} />] : []),
     <StepForm3 key="stepThree" {...stepForm3Props} />,
   ]);
 
-  const validateStep1 = () => stepForm1Props.firstName && stepForm1Props.lastName && stepForm1Props.mail && stepForm1Props.dob;
-  const validateStep2 = () => stepForm2Props.phone && stepForm2Props.gender && stepForm2Props.nationality && stepForm2Props.home_address;
-  const validateStep3 = () => stepForm3Props.pword && stepForm3Props.cpword && stepForm3Props.terms;
-  const validateStep4 = () => stepForm4Props.specialty && stepForm4Props.induction_year && stepForm4Props.place_of_practice;
+  const validateStep = (stepIndex: number) => {
+    switch (stepIndex) {
+      case 0:
+        console.log('Validating step 1...');
+        return validateStep1();
+      case 1:
+        console.log('Validating step 2...');
+        return validateStep2();
+      case 2:
+        if (isDoctor) {
+          console.log('Validating step 3 (doctor specific)...');
+          return validateStep3();
+        }
+        console.log('Validating step 3 (general)...');
+        return validateStep4();
+      case 3:
+        console.log('Validating step 4...');
+        return validateStep4();
+      default:
+        return false;
+    }
+  };
+
+  const validateStep1 = () => {
+    return stepForm1Props.firstName && stepForm1Props.lastName && stepForm1Props.mail && stepForm1Props.dob;
+  };
+  
+  const validateStep2 = () => {
+    return stepForm2Props.phone && stepForm2Props.gender && stepForm2Props.nationality && stepForm2Props.home_address;
+  };
+  
+  const validateStep3 = () => {
+    return stepForm4Props.specialty && stepForm4Props.induction_year && stepForm4Props.place_of_practice;
+  };
+  
+  const validateStep4 = () => {
+    return stepForm3Props.pword && stepForm3Props.cpword && stepForm3Props.terms;
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
-    const isValid = [
-      isFirstStep ? validateStep1() : true,
-      isSecondStep ? validateStep2() : true,
-      isThirdStep ? validateStep3() : true,
-      isFourthStep ? validateStep4() : true
-    ].every(Boolean);
-
+    const isValid = validateStep(currentStepIndex);
+  
     if (isValid) {
       if (isLastStep) {
         try {
@@ -150,14 +174,14 @@ const SignUp = () => {
           const url = `${baseURL}${endpoint}`;
           
           const apiKey = import.meta.env.VITE_APP_API_KEY;
-
+    
           const response = await axios.post(url, formData, {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${apiKey}`,
             }
           });
-
+    
           console.log("Form Submitted!", response.data);
           localStorage.setItem('email', formData.mail ?? "");
           navigate("/verifyEmail");
@@ -172,11 +196,11 @@ const SignUp = () => {
         next();
       }
     } else {
-      toast.success("Account created! You can login now");
+      toast.error("Please fill out all required fields.");
     }
   };
 
-  function handleOkayClick() {
+  const handleOkayClick = () => {
     navigate('/signin'); 
   }
 
@@ -198,8 +222,6 @@ const SignUp = () => {
           onSubmit={onSubmit} 
           className="w-full gap-3 flex flex-col text-center justify-center px-4 py-8 rounded-md bg-white shadow-[#2A2A2A33]"
         >
-          {/* <ToastContainer /> */}
-
           <div className="flex justify-center items-center mb-4">
             <img src={logo} alt="logo" width={100} height={100} />
           </div>

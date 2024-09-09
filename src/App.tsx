@@ -11,6 +11,10 @@ import Wallet from "./_Root/pages/Wallet"
 import VerifyEmail from "./_Auth/VerifyEmail"
 import RootLayout from "./_Root/pages/RootLayout"
 import Successful from "./_Auth/Successful"
+import Alldoctors from "./components/Doctor/AllDoctors"
+import Settings from "./_Root/pages/Settings"
+import Notifications from "./_Root/pages/Notifications"
+import Cards from "./_Root/pages/Cards"
 
 
 function App() {
@@ -35,6 +39,10 @@ function App() {
         <Route path="/doctor" element={<Doctor/>}/>
         <Route path="/chat" element={<Chat/>}/>
         <Route path="/wallet" element={<Wallet/>}/>
+       <Route path="/settings" element={<Settings/>}/>
+       <Route path="/notifications" element={<Notifications/>} />
+       <Route path="cards" element={<Cards/>}/>
+       <Route path="/all-doctors/:id" element={<Alldoctors/>}/>
         </Route>
       </Routes>
       
