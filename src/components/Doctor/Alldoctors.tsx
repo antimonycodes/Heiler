@@ -1,54 +1,45 @@
+// Alldoctors.tsx
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import CircularLoader from "../Shared/CircularLoader";
-import doctordp from "../../assets/doctordp.png"
-import stars from "../../assets/stars.png"
+import doctordp from "../../assets/doctordp.png";
+import stars from "../../assets/stars.png";
 
 const Alldoctors = () => {
-  const { id } = useParams<{ id: string }>(); // Get the specialty id from URL
+  const { id } = useParams<{ id: string }>();
   const [response, setResponse] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchDoctor = async () => {
     try {
       const baseURL = import.meta.env.VITE_APP_BASE_URL;
-      const endpoint = '/doctors/list.bySpecialty';
+      const endpoint = "/doctors/list.bySpecialty";
       const url = `${baseURL}${endpoint}`;
       const apiKey = import.meta.env.VITE_APP_API_KEY;
-      
-      // Retrieve user token from localStorage
       const token = localStorage.getItem("token");
-      
-      // Ensure the token exists
-      if (!token) {
+
+      if (!token)
         throw new Error("User token is missing. Please log in again.");
-      }
+
       const specialtyId = Number(id);
-      // Make the POST request with body data
-      const response = await axios.post(url, 
-        {
-          id: specialtyId,    // Pass specialty id in the body
-          usertoken: token,   // Pass user token in the body
-        },
+      const response = await axios.post(
+        url,
+        { id: specialtyId, usertoken: token },
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,  // Pass API key here
-          }
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
         }
       );
-      console.log('Request body:', {
-        id: id,
-        usertoken: token
-      });
-      
 
       if (response.data.success) {
-        setResponse(response.data.data); // Set the response data
+        setResponse(response.data.data);
       } else {
-        setError(response.data.message); // Handle API errors
+        setError(response.data.message);
       }
     } catch (error) {
       console.error("Error fetching doctors:", error);
@@ -60,10 +51,63 @@ const Alldoctors = () => {
 
   useEffect(() => {
     fetchDoctor();
-  }, [id]); // Re-fetch doctors when the id changes
+  }, [id]);
+
+  // const handleSendMessage = (doctor: any) => {
+  //   const storedDoctors = localStorage.getItem("chatDoctors");
+  //   let doctorsArray = storedDoctors ? JSON.parse(storedDoctors) : [];
+
+  //   const existingDoctorIndex = doctorsArray.findIndex(
+  //     (existingDoctor: any) => existingDoctor.id === doctor.id
+  //   );
+
+  //   if (existingDoctorIndex !== -1) {
+  //     // Doctor already exists, update its details
+  //     doctorsArray[existingDoctorIndex] = doctor;
+  //   } else {
+  //     // Doctor not found, add it to the list
+  //     doctorsArray.push({
+  //       firstName: doctor.firstName,
+  //       lastName: doctor.lastName,
+  //       specialty: doctor.specialty,
+  //       id: doctor.id,
+  //     });
+  //   }
+
+  //   localStorage.setItem("chatDoctors", JSON.stringify(doctorsArray));
+  //   navigate("/chat");
+  // };
+
+  const handleSendMessage = (doctor: any) => {
+    // Get any existing doctors from localStorage
+    const storedDoctors = localStorage.getItem("chatDoctors");
+    let doctorsArray = storedDoctors ? JSON.parse(storedDoctors) : [];
+
+    // Check if the doctor with the same token already exists
+    const existingDoctor = doctorsArray.find(
+      (existingDoctor: any) => existingDoctor.token === doctor.token
+    );
+
+    if (!existingDoctor) {
+      // Doctor not found, add the new doctor to the array
+      doctorsArray.push({
+        firstName: doctor.firstName,
+        lastName: doctor.lastName,
+        specialty: doctor.specialty,
+        id: doctor.id,
+        token: doctor.token,
+      });
+
+      // Save the updated array back to localStorage
+      localStorage.setItem("chatDoctors", JSON.stringify(doctorsArray));
+    }
+
+    // Navigate to the chat page
+    navigate("/chat");
+  };
 
   return (
-    <div>
+    <div className="relative">
       {loading ? (
         <CircularLoader />
       ) : (
@@ -71,30 +115,29 @@ const Alldoctors = () => {
           {error ? (
             <p style={{ color: "red" }}>{error}</p>
           ) : (
-            <div className=" grid grid-cols-1 md:grid-cols-2  gap-4 px-4">
-              {/* Render the list of doctors */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
               {response.map((doctor, index) => (
-                <div key={index} className=" border px-4 py-4 flex flex-col gap-4">
-                  <div className=" flex justify-between">
-                    {/* profile picture */}
-                    <div className=" ">
-                      <img src={doctordp} alt="" />
-                      </div>
-                      {/* info */}
-                      <div>
-                        <div className=" flex justify-between">
-                        <h1 className=" text-lg font-semibold">{`Dr. ${doctor.lastName} ${doctor.firstName}`}</h1>
-                        </div>
-                        <p>MBBS, MD, FMCS(Dentistry)</p>
-                        <img src={stars} alt="" />
-                      </div>
-                      {/* specialist */}
-                      <p className=" text-customGreen font-semi-bold">Specialist</p>
-
+                <div
+                  key={index}
+                  className="border px-4 py-4 flex flex-col gap-4"
+                >
+                  <div className="flex justify-between">
+                    <img src={doctordp} alt="Doctor Profile" />
+                    <div>
+                      <h1 className="text-lg font-semibold">{`Dr. ${doctor.lastName} ${doctor.firstName}`}</h1>
+                      <p>MBBS, MD, FMCS(Dentistry)</p>
+                      <img src={stars} alt="Rating" />
+                    </div>
+                    <p className="text-customGreen font-semi-bold">
+                      Specialist
+                    </p>
                   </div>
-                  {/*  */}
-                  {/*  */}
-                  <button className=" bg-customGreen w-full px-2 py-2 text-white rounded">See Profile</button>
+                  <button
+                    className="bg-customGreen w-full px-2 py-2 text-white rounded"
+                    onClick={() => handleSendMessage(doctor)}
+                  >
+                    Send a message
+                  </button>
                 </div>
               ))}
             </div>

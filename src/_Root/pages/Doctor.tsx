@@ -1,4 +1,4 @@
-import DocTopSection from "@/components/Doctor/DocTopSection";
+// import DocTopSection from "@/components/Doctor/DocTopSection";
 import { useUser } from "../../contexts/UserContext";
 import Search from "@/components/Doctor/Search";
 import Alldoctors from "@/components/Doctor/AllSpecialties";
