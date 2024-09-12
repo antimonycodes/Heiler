@@ -1,21 +1,107 @@
-import { useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Picker } from "emoji-mart";
 import chatgif from "../../assets/ZAbi.gif";
 import cameraicon from "../../assets/cameraicon.svg";
 import emojiicon from "../../assets/emojiicon.svg";
 import fileicon from "../../assets/fileicon.svg";
 import micicon from "../../assets/micicon.svg";
-import { Picker } from "emoji-mart";
+import axios from "axios";
 
-const ChatScreen = () => {
-  const location = useLocation();
-  const doctor = location.state?.doctor; // Access the passed doctor data
-
+const ChatScreen = ({ doctor, onBack }) => {
   const [showFileModal, setShowFileModal] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [message, setMessage] = useState("");
+  const [image, setImage] = useState(""); // For base64 encoded image
+  const [voiceNote, setVoiceNote] = useState("");
+  const [messages, setMessages] = useState([]); // Will hold the messages from the backend
 
-  const handleEmojiSelect = (emoji: any) => {
+  const messagesEndRef = useRef(null);
+  const recipient = doctor?.token;
+
+  // Function to fetch and filter messages
+  const getMessages = async () => {
+    try {
+      const baseURL = import.meta.env.VITE_APP_BASE_URL;
+      const endpoint = "/chat/read"; // Assuming this endpoint returns all chats
+      const url = `${baseURL}${endpoint}`;
+      const apiKey = import.meta.env.VITE_APP_API_KEY;
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        url,
+        { usertoken: token, recipient: doctor?.token },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+        }
+      );
+
+      if (response.status === 200 && response.data.msg === "true") {
+        const fetchedMessages = response.data.data; // Set only the chats for the selected recipient
+
+        // Check if fetchedMessages is an array before mapping
+        const messagesArray = Array.isArray(fetchedMessages)
+          ? fetchedMessages
+          : [fetchedMessages]; // Convert to array if needed
+
+        setMessages(messagesArray);
+        // Save messages to local storage immediately
+        saveMessagesToLocalStorage(messagesArray);
+      } else {
+        console.error("Error fetching messages:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  // ... rest of your code
+  // Function   to save messages to local storage
+  const saveMessagesToLocalStorage = (messages) => {
+    try {
+      const serializedMessages = JSON.stringify(messages);
+      localStorage.setItem("chatMessages", serializedMessages);
+    } catch (error) {
+      console.error("Error saving messages:", error);
+    }
+  };
+
+  // Function to fetch messages from local storage
+  const getMessagesFromLocalStorage = () => {
+    try {
+      const serializedMessages = localStorage.getItem("chatMessages");
+      if (serializedMessages) {
+        const parsedMessages = JSON.parse(serializedMessages);
+        setMessages(parsedMessages);
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+  };
+
+  // useEffect hook to fetch messages
+  useEffect(() => {
+    if (doctor) {
+      // Fetch messages when doctor changes
+      getMessages();
+    }
+  }, [doctor]);
+
+  useEffect(() => {
+    getMessagesFromLocalStorage(); // Fetch messages from local storage on component mount
+  }, []);
+
+  // Scroll to the latest message
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]); // Automatically scroll when messages update
+
+  const handleEmojiSelect = (emoji) => {
     setMessage(message + emoji.native);
     setShowEmojiPicker(false);
   };
@@ -38,16 +124,56 @@ const ChatScreen = () => {
     }
   };
 
+  const sendChatMessage = async () => {
+    const sender = localStorage.getItem("token");
+
+    const newMessage = {
+      sender,
+      recipient,
+      message,
+      image,
+      vn: voiceNote,
+      // timestamp: new Date().toISOString(), // Add a timestamp for the message
+    };
+
+    try {
+      const baseURL = import.meta.env.VITE_APP_BASE_URL;
+      const endpoint = "/chat/send";
+      const url = `${baseURL}${endpoint}`;
+      const apiKey = import.meta.env.VITE_APP_API_KEY;
+
+      const response = await axios.post(url, newMessage, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+
+      if (response.status === 200) {
+        console.log("Message sent successfully:", response.data);
+        setMessage(""); // Clear the input after sending
+        getMessages(); // Fetch updated messages after sending the message
+      } else {
+        console.error("Error sending message:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-between h-full">
       {/* Top section */}
-      <div className=" bg-customGreen py-4 px-8">
-        <div className=" flex items-center gap-2 text-white">
-          <div>BACK</div>
+      <div className="bg-customGreen py-4 px-8">
+        <div className="flex items-center gap-2 text-white">
+          <div onClick={onBack} className="cursor-pointer">
+            BACK
+          </div>{" "}
+          {/* Back button */}
           <div>
             <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold mr-4"></div>
           </div>
-          <div className=" flex flex-col justify-center">
+          <div className="flex flex-col justify-center">
             <h1>{`Dr. ${doctor?.lastName} ${doctor?.firstName}`}</h1>
             <p>online</p>
           </div>
@@ -55,16 +181,38 @@ const ChatScreen = () => {
       </div>
 
       {/* Chat section */}
-      <div className="basis-[80%] flex-1 h-full flex justify-center items-center">
-        <div className=" flex flex-col items-center gap-4">
-          <img src={chatgif} alt="Chat GIF" width={150} />
-          <p className=" text-customGray italic">No messages yet ...</p>
-          <h1 className=" text-lg font-bold">Start by sending a message.</h1>
-        </div>
+      <div className="flex-1 h-full px-4 py-2 overflow-y-auto">
+        {messages.length === 0 && !Array.isArray(messages) ? (
+          <div className="flex flex-col items-center gap-4">
+            <img src={chatgif} alt="Chat GIF" width={150} />
+            <p className="text-customGray italic">No messages yet ...</p>
+            <h1 className="text-lg font-bold">Start by sending a message.</h1>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {console.log("messages:", messages)}
+            {messages.map((chat, index) => (
+              <div
+                key={index}
+                className={`p-3 rounded-lg max-w-md ${
+                  chat.sender === localStorage.getItem("token")
+                    ? "self-end bg-green-500 text-white"
+                    : "self-start bg-gray-200 text-black"
+                }`}
+              >
+                {chat.message}
+                <span className="text-xs text-gray-500 ml-2">
+                  {new Date(chat.timestamp).toLocaleTimeString()}
+                </span>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
       </div>
 
       {/* Bottom section */}
-      <div className=" mb-4 basis-[10%] flex items-center bg-[#F2FFF9] py-3 px-4 rounded-full mx-8 relative">
+      <div className="mb-4 basis-[10%] flex items-center bg-[#F2FFF9] py-3 px-4 rounded-full mx-8 relative">
         {/* Emoji Picker */}
         {showEmojiPicker && (
           <div className="absolute bottom-12 left-0">
@@ -100,7 +248,7 @@ const ChatScreen = () => {
 
           <input
             type="text"
-            className=" placeholder:text-customGray placeholder:italic w-full py-2 px-12 pr-20 rounded-full border-none outline-none bg-white"
+            className="placeholder:text-customGray placeholder:italic w-full py-2 px-12 pr-20 rounded-full border-none outline-none bg-white"
             placeholder="Type a message ..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -108,12 +256,12 @@ const ChatScreen = () => {
         </div>
 
         {/* Mic icon (outside the input on the right) */}
-        <div className=" bg-customGreen py-2 px-2 rounded-full">
+        <div className="bg-customGreen py-2 px-2 rounded-full">
           <img
             src={micicon}
             alt="Mic"
             className="w-6 h-6 cursor-pointer"
-            onClick={handleAudioRecord}
+            onClick={sendChatMessage}
           />
         </div>
       </div>

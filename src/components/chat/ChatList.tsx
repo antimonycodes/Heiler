@@ -1,8 +1,8 @@
-import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import chatplus from "../../assets/chatplus.svg";
 
-const ChatList = () => {
+const ChatList = ({ onChatSelect }) => {
   const [doctorsList, setDoctorsList] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const ChatList = () => {
   });
 
   const handleChatOpen = (doctor: any) => {
-    navigate("/chat", { state: { doctor } }); // Pass doctor data to ChatScreen
+    onChatSelect(doctor); // Pass selected doctor to parent component
   };
 
   return (
@@ -47,11 +47,11 @@ const ChatList = () => {
 
       {/* Doctor List */}
       {filteredDoctors.length > 0 ? (
-        <div className=" flex  flex-col gap-2">
+        <div className="flex flex-col gap-2">
           {filteredDoctors.map((doctor, index) => (
             <div
               key={index}
-              className="flex items-center bg-white  rounded-lg cursor-pointer"
+              className="flex items-center bg-white rounded-lg cursor-pointer"
               onClick={() => handleChatOpen(doctor)}
             >
               {/* Placeholder profile image */}
