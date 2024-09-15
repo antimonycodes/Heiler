@@ -6,20 +6,26 @@ import emojiicon from "../../assets/emojiicon.svg";
 import fileicon from "../../assets/fileicon.svg";
 import micicon from "../../assets/micicon.svg";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
-const ChatScreen = ({ doctor, onBack }) => {
+const ChatScreen = ({ onChatSelect, onBack }) => {
   const [showFileModal, setShowFileModal] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [message, setMessage] = useState("");
   const [image, setImage] = useState(""); // For base64 encoded image
   const [voiceNote, setVoiceNote] = useState("");
   const [messages, setMessages] = useState([]); // Will hold the messages from the backend
+  const [chatDetails, setChatDetails] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const location = useLocation();
+  const doctor = location.state?.doctor; // Doctor details
+  console.log(doctor);
 
   const messagesEndRef = useRef(null);
   const recipient = doctor?.token;
 
   // Function to fetch and filter messages
-  const getMessages = async () => {
+  const readChat = async () => {
     try {
       const baseURL = import.meta.env.VITE_APP_BASE_URL;
       const endpoint = "/chat/read"; // Assuming this endpoint returns all chats
@@ -36,61 +42,47 @@ const ChatScreen = ({ doctor, onBack }) => {
           },
         }
       );
-
-      if (response.status === 200 && response.data.msg === "true") {
-        const fetchedMessages = response.data.data; // Set only the chats for the selected recipient
-
-        // Check if fetchedMessages is an array before mapping
-        const messagesArray = Array.isArray(fetchedMessages)
-          ? fetchedMessages
-          : [fetchedMessages]; // Convert to array if needed
-
-        setMessages(messagesArray);
-        // Save messages to local storage immediately
-        saveMessagesToLocalStorage(messagesArray);
-      } else {
-        console.error("Error fetching messages:", response.statusText);
-      }
+      setMessages(response.data.data);
+      console.log(response.data.data);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
 
-  // ... rest of your code
-  // Function   to save messages to local storage
-  const saveMessagesToLocalStorage = (messages) => {
-    try {
-      const serializedMessages = JSON.stringify(messages);
-      localStorage.setItem("chatMessages", serializedMessages);
-    } catch (error) {
-      console.error("Error saving messages:", error);
-    }
-  };
+  // // Function   to save messages to local storage
+  // const saveMessagesToLocalStorage = (messages) => {
+  //   try {
+  //     const serializedMessages = JSON.stringify(messages);
+  //     localStorage.setItem("chatMessages", serializedMessages);
+  //   } catch (error) {
+  //     console.error("Error saving messages:", error);
+  //   }
+  // };
 
-  // Function to fetch messages from local storage
-  const getMessagesFromLocalStorage = () => {
-    try {
-      const serializedMessages = localStorage.getItem("chatMessages");
-      if (serializedMessages) {
-        const parsedMessages = JSON.parse(serializedMessages);
-        setMessages(parsedMessages);
-      }
-    } catch (error) {
-      console.error("Error loading messages:", error);
-    }
-  };
+  // // Function to fetch messages from local storage
+  // const readChatFromLocalStorage = () => {
+  //   try {
+  //     const serializedMessages = localStorage.getItem("chatMessages");
+  //     if (serializedMessages) {
+  //       const parsedMessages = JSON.parse(serializedMessages);
+  //       setMessages(parsedMessages);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading messages:", error);
+  //   }
+  // };
 
   // useEffect hook to fetch messages
   useEffect(() => {
     if (doctor) {
       // Fetch messages when doctor changes
-      getMessages();
+      readChat();
     }
   }, [doctor]);
 
-  useEffect(() => {
-    getMessagesFromLocalStorage(); // Fetch messages from local storage on component mount
-  }, []);
+  // useEffect(() => {
+  //   readChatFromLocalStorage(); // Fetch messages from local storage on component mount
+  // }, []);
 
   // Scroll to the latest message
   const scrollToBottom = () => {
@@ -152,7 +144,7 @@ const ChatScreen = ({ doctor, onBack }) => {
       if (response.status === 200) {
         console.log("Message sent successfully:", response.data);
         setMessage(""); // Clear the input after sending
-        getMessages(); // Fetch updated messages after sending the message
+        readChat(); // Fetch updated messages after sending the message
       } else {
         console.error("Error sending message:", response.statusText);
       }
@@ -179,10 +171,9 @@ const ChatScreen = ({ doctor, onBack }) => {
           </div>
         </div>
       </div>
-
       {/* Chat section */}
       <div className="flex-1 h-full px-4 py-2 overflow-y-auto">
-        {messages.length === 0 && !Array.isArray(messages) ? (
+        {!messages || !Array.isArray(messages) || messages.length === 0 ? (
           <div className="flex flex-col items-center gap-4">
             <img src={chatgif} alt="Chat GIF" width={150} />
             <p className="text-customGray italic">No messages yet ...</p>
@@ -210,7 +201,6 @@ const ChatScreen = ({ doctor, onBack }) => {
           </div>
         )}
       </div>
-
       {/* Bottom section */}
       <div className="mb-4 basis-[10%] flex items-center bg-[#F2FFF9] py-3 px-4 rounded-full mx-8 relative">
         {/* Emoji Picker */}
@@ -265,7 +255,6 @@ const ChatScreen = ({ doctor, onBack }) => {
           />
         </div>
       </div>
-
       {/* File Modal */}
       {showFileModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">

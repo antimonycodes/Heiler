@@ -62,12 +62,14 @@ const HomeWallet = () => {
   const prevStep = () => setStep((prevStep) => prevStep - 1);
 
   return (
-    <div className="relative flex flex-col gap-4">
+    <div className="relative flex flex-col gap-8">
       {/* Balance Display */}
-      <div className="bg-customGreen text-white flex flex-col gap-4 px-4 py-4 rounded-xl">
+      <div className="bg-customGreen text-white flex flex-col gap-4 px-8 py-12 rounded-2xl">
         <h2 className="text-white">My Balance</h2>
         <div className="flex justify-between items-center">
-          <h1>NGN 4,562.52</h1>
+          <h1 className=" font-bold text-[#FFFFFFCC] leading-[2%]">
+            NGN 4,562.52
+          </h1>
           <img src={balanceEye} alt="Show Balance" />
         </div>
       </div>

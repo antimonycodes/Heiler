@@ -40,10 +40,10 @@ const TopSection = () => {
   const name = "Oluwadara";
 
   return (
-    <div className="py-4 px-4 md:px-12 shadow">
+    <div className="py-4 px-4 md:px-16 shadow">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-customGray">{`${dayName}, ${dayOfMonth} ${monthName}`}</p>
+          <p className="text-customGray text-sm">{`${dayName}, ${dayOfMonth} ${monthName}`}</p>
           <h1 className="text-xl font-bold">Hi, {name}</h1>
         </div>
         <div className="relative flex items-center gap-4">

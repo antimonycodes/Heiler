@@ -1,6 +1,14 @@
-import { FaHome, FaUserMd, FaComments, FaWallet, FaCog, FaRegCreditCard, FaBell } from "react-icons/fa";
+import {
+  FaHome,
+  FaUserMd,
+  FaComments,
+  FaWallet,
+  FaCog,
+  FaRegCreditCard,
+  FaBell,
+} from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
-import heilerLogo from "../../assets/heilerLogo.png"
+import heilerLogo from "../../assets/heilerLogo.png";
 
 const SideNav = () => {
   const SideNavs = [
@@ -17,15 +25,21 @@ const SideNav = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="bg-white shadow h-screen flex flex-col items-start gap-4 px-4 py-2">
+    <div className=" shadow h-screen flex flex-col items-start gap-4 px-10 py-8">
       <Link to="/">
-      <img src={heilerLogo} alt="" width={100} />
+        <img src={heilerLogo} alt="" width={100} />
       </Link>
       {SideNavs.map((navItem, index) => (
         <Link to={navItem.path} key={index}>
-          <div className={`flex-1 flex items-center transition-all duration-500  gap-3 text-center py-2 ${isActive(navItem.path) ? " text-customGreen" : ' text-customGray'}`}>
+          <div
+            className={`flex-1 flex items-center transition-all duration-500  gap-3 text-center py-2 ${
+              isActive(navItem.path) ? " text-customGreen" : " text-customGray"
+            }`}
+          >
             <span className="text-xl">{navItem.icon}</span>
-            <span className=" text-base font-semibold text-customGreen">{navItem.name}</span>
+            <span className=" text-base font-semibold text-customGreen">
+              {navItem.name}
+            </span>
           </div>
         </Link>
       ))}

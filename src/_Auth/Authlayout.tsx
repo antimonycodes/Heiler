@@ -2,7 +2,6 @@ import { Navigate, Outlet } from "react-router-dom";
 import banner from "/banner.jpg";
 
 const Authlayout = () => {
-
   // const isAuthenticated = false;
 
   // if (isAuthenticated) {
@@ -11,7 +10,7 @@ const Authlayout = () => {
 
   return (
     <div
-      className="px-4 py-12 flex items-center justify-center h-screen"
+      className="px- py-12 sm:flex sm:items-center sm:justify-center h-screen"
       style={{
         backgroundImage: `url(${banner})`,
         backgroundPosition: "center",

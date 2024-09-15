@@ -53,31 +53,6 @@ const Alldoctors = () => {
     fetchDoctor();
   }, [id]);
 
-  // const handleSendMessage = (doctor: any) => {
-  //   const storedDoctors = localStorage.getItem("chatDoctors");
-  //   let doctorsArray = storedDoctors ? JSON.parse(storedDoctors) : [];
-
-  //   const existingDoctorIndex = doctorsArray.findIndex(
-  //     (existingDoctor: any) => existingDoctor.id === doctor.id
-  //   );
-
-  //   if (existingDoctorIndex !== -1) {
-  //     // Doctor already exists, update its details
-  //     doctorsArray[existingDoctorIndex] = doctor;
-  //   } else {
-  //     // Doctor not found, add it to the list
-  //     doctorsArray.push({
-  //       firstName: doctor.firstName,
-  //       lastName: doctor.lastName,
-  //       specialty: doctor.specialty,
-  //       id: doctor.id,
-  //     });
-  //   }
-
-  //   localStorage.setItem("chatDoctors", JSON.stringify(doctorsArray));
-  //   navigate("/chat");
-  // };
-
   const handleSendMessage = (doctor: any) => {
     // Get any existing doctors from localStorage
     const storedDoctors = localStorage.getItem("chatDoctors");
@@ -103,7 +78,7 @@ const Alldoctors = () => {
     }
 
     // Navigate to the chat page
-    navigate("/chat");
+    navigate("/chat", { state: { doctor } });
   };
 
   return (

@@ -1,31 +1,58 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import chatplus from "../../assets/chatplus.svg";
+import axios from "axios";
 
-const ChatList = ({ onChatSelect }) => {
-  const [doctorsList, setDoctorsList] = useState<any[]>([]);
+const ChatList = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [response, setResponse] = useState<any[]>([]);
   const navigate = useNavigate();
+  const intervalRef = useRef(null);
+
+  const getChat = async () => {
+    try {
+      const baseURL = import.meta.env.VITE_APP_BASE_URL;
+      const endpoint = "/chat/get";
+      const url = `${baseURL}${endpoint}`;
+      const apiKey = import.meta.env.VITE_APP_API_KEY;
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        url,
+        { usertoken: token },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+        }
+      );
+      setResponse(response.data.data);
+      console.log("GET CHATS", response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    const storedDoctors = localStorage.getItem("chatDoctors");
-    if (storedDoctors) {
-      setDoctorsList(JSON.parse(storedDoctors));
-    }
+    // Initial fetch
+    getChat();
+
+    // Set up the interval to fetch data every 3 seconds
+    // const intervalId = setInterval(getChat, 3000);
+    // intervalRef.current = intervalId;
+
+    // Clean up the interval on component unmount
+    // return () => clearInterval(intervalRef.current);
   }, []);
 
-  const filteredDoctors = doctorsList.filter((doctor) => {
-    const fullName = `${doctor.firstName} ${doctor.lastName}`;
-    return fullName.toLowerCase().includes(searchQuery.toLowerCase());
-  });
-
-  const handleChatOpen = (doctor: any) => {
-    onChatSelect(doctor); // Pass selected doctor to parent component
+  const handleChatSelect = (chat) => {
+    // Navigate to the chat screen with the selected chat data
+    navigate("/chat", { state: { doctor: chat.recipientData } });
   };
 
   return (
     <div className="p-4 shadow-md h-full">
-      {/* Top bar */}
       <div className="flex justify-between items-center mb-4">
         <div className="bg-customGreen p-2 rounded-full">
           <img src={chatplus} alt="Chat" className="w-6 h-6" />
@@ -45,30 +72,32 @@ const ChatList = ({ onChatSelect }) => {
         </div>
       </div>
 
-      {/* Doctor List */}
-      {filteredDoctors.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          {filteredDoctors.map((doctor, index) => (
-            <div
-              key={index}
-              className="flex items-center bg-white rounded-lg cursor-pointer"
-              onClick={() => handleChatOpen(doctor)}
-            >
-              {/* Placeholder profile image */}
-              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold mr-4">
-                {doctor.firstName.charAt(0).toUpperCase()}
+      <div>
+        {response && response.length > 0 ? (
+          response
+            .filter((chat) => {
+              const fullName =
+                `${chat.recipientData?.firstName} ${chat.recipientData?.lastName}`.toLowerCase();
+              return fullName.includes(searchQuery.toLowerCase());
+            })
+            .map((chat, index) => (
+              <div
+                key={index}
+                className="p-2 border-b cursor-pointer"
+                onClick={() => handleChatSelect(chat)}
+              >
+                <h2 className="text-lg font-semibold">
+                  {chat.recipientData?.firstName} {chat.recipientData?.lastName}
+                </h2>
+                <p className="text-sm text-gray-500">
+                  {chat.lastMessage?.message || "No message"}
+                </p>
               </div>
-              {/* Doctor details */}
-              <div>
-                <h1 className="font-bold text-lg">{`Dr. ${doctor.lastName} ${doctor.firstName}`}</h1>
-                <p className="text-sm text-gray-500">{doctor.specialty}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p>No doctors found matching your search</p>
-      )}
+            ))
+        ) : (
+          <p>No chats available</p>
+        )}
+      </div>
     </div>
   );
 };

@@ -8,11 +8,11 @@ const Homepage = () => {
   return (
     <div>
       {/* <TopSection/> */}
-      <div className=" px-4 md:px-12 md:py-4 flex flex-col md:flex-row items-start gap-4">
-        <div className="w-full basis-1/2">
+      <div className=" px-4 md:px-16 md:py-8 flex flex-col md:flex-row items-start gap-4">
+        <div className="w-full ">
           <HomeHero />
         </div>
-        <div className="w-full basis-1/2">
+        <div className="w-full basis-[70%]">
           <div className=" hidden md:block">
             <HomeWallet />
           </div>

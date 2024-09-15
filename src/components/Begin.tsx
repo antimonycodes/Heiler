@@ -1,14 +1,12 @@
-import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
 const Begin = () => {
   const navigate = useNavigate();
-  const { setUserType } = useUser();
 
-  const handleSelect = (type: 'doctor' | 'patient') => {
-    setUserType(type);
-    localStorage.setItem('userType', type); 
-    navigate('/signup');
+  const handleSelect = (type: "doctor" | "patient") => {
+    localStorage.setItem("selectedUserType", type);
+    console.log(type);
+    navigate("/signup");
   };
 
   return (
@@ -17,13 +15,13 @@ const Begin = () => {
         <h1 className="text-center font-bold text-xl">Who Are You?</h1>
         <button
           className="py-4 text-customGreen border border-customGreen w-full"
-          onClick={() => handleSelect('doctor')}
+          onClick={() => handleSelect("doctor")}
         >
           Doctor
         </button>
         <button
           className="py-4 bg-customGreen border text-white w-full"
-          onClick={() => handleSelect('patient')}
+          onClick={() => handleSelect("patient")}
         >
           Patient
         </button>

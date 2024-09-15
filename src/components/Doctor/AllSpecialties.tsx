@@ -1,9 +1,9 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
+import axios from "axios";
+import { useEffect, useState } from "react";
 // import { ClipLoader } from 'react-spinners';
 import doctorcard from "../../assets/doctorcard.png";
-import { Link } from 'react-router-dom';
-import CircularLoader from '../Shared/CircularLoader';
+import { Link } from "react-router-dom";
+import CircularLoader from "../Shared/CircularLoader";
 
 const AllSpecialties = () => {
   const [response, setResponse] = useState<any[]>([]);
@@ -12,15 +12,15 @@ const AllSpecialties = () => {
   const fetchDoctorSpecialties = async () => {
     try {
       const baseURL = import.meta.env.VITE_APP_BASE_URL;
-      const endpoint = '/general/getSpecialties';
+      const endpoint = "/general/getSpecialties";
       const url = `${baseURL}${endpoint}`;
       const apiKey = import.meta.env.VITE_APP_API_KEY;
 
       const response = await axios.get(url, {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        }
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
       });
       setResponse(response.data);
     } catch (error) {
@@ -37,14 +37,14 @@ const AllSpecialties = () => {
   return (
     <div>
       {loading ? (
-      <CircularLoader/>
+        <CircularLoader />
       ) : (
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-8 h-full'>
-          {response.data.map((item) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-8 h-full">
+          {response.data?.map((item) => (
             <Link to={`/all-doctors/${item.id}`} key={item.id}>
-              <div className='flex flex-col items-center'>
+              <div className="flex flex-col items-center">
                 <img src={doctorcard} alt="Doctor Specialty" />
-                <h1 className='text-xl font-semi-bold'>{item.name}</h1>
+                <h1 className="text-xl font-semi-bold">{item.name}</h1>
               </div>
             </Link>
           ))}
